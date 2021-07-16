@@ -7,6 +7,8 @@
 
 #include <scene/resources/texture.h>
 
+#include <scene/2d/collision_polygon_2d.h>
+
 #include "SpineAnimationStateDataResource.h"
 #include "SpineSkeleton.h"
 #include "SpineAnimationState.h"
@@ -19,6 +21,18 @@ protected:
     static void _bind_methods();
 
 	void _notification(int p_what);
+
+    void _get_property_list(List<PropertyInfo> *p_list) const;
+    bool _get(const StringName &p_property, Variant &r_value) const;
+    bool _set(const StringName &p_property, const Variant &p_value);
+
+    void _validate_and_play_current_animations();
+public:
+    enum ProcessMode {
+        ProcessMode_Process,
+        ProcessMode_Physics,
+        ProcessMode_Manual
+    };
 private:
 
     Ref<SpineAnimationStateDataResource> animation_state_data_res;
@@ -31,9 +45,12 @@ private:
 	Array current_animations;
 	int select_track_id;
 	float empty_animation_duration;
+
 	Array bind_slot_nodes;
-	bool overlap = false;
+	bool overlap;
 	Ref<PackedSpineSkinResource> skin;
+
+    ProcessMode process_mode;
 
 	spine::SkeletonClipping *skeleton_clipper;
 
@@ -63,6 +80,7 @@ public:
 	void _on_animation_data_created();
 	void _on_animation_data_changed();
 
+	void _update_all(float delta);
 
 	// External feature functions
 	Array get_current_animations();
@@ -103,7 +121,13 @@ public:
 
 	Ref<SpineSkin> gen_spine_skin_from_packed_resource(Ref<PackedSpineSkinResource> res);
 
+    // current animation count
+    int64_t get_current_animation_count() const;
+    void set_current_animation_count(int64_t v);
+
+	ProcessMode get_process_mode();
+	void set_process_mode(ProcessMode v);
 };
 
-
+VARIANT_ENUM_CAST(SpineSprite::ProcessMode);
 #endif //GODOT_SPINESPRITE_H
